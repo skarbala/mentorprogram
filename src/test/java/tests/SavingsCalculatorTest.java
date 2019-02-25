@@ -5,10 +5,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.Select;
+
+import pages.SavingsRequestPage;
 
 public class SavingsCalculatorTest {
   private WebDriver driver;
@@ -22,7 +22,7 @@ public class SavingsCalculatorTest {
 
   @Test
   public void itShouldDisplayTitle() {
-    String expectedTitle = "Savings calculator";
+    String expectedTitle = "Savings Calculator";
     String actualTitle = driver.findElement(By.cssSelector("h1")).getText();
 
     Assert.assertEquals(expectedTitle, actualTitle);
@@ -30,38 +30,25 @@ public class SavingsCalculatorTest {
 
   @Test
   public void itShouldCalculateTotalIncome() {
-    selectFund("Hoggwart's Fund");
-    inputInvestment("52000");
-    inputYears("10");
-    String actualTotalIncome = driver.findElement(By.cssSelector("div.result p")).getText();
+    SavingsRequestPage savingsRequestPage = new SavingsRequestPage(driver);
+
+    savingsRequestPage.selectFund("Hoggwart's Fund");
+    savingsRequestPage.inputInvestment("52000");
+    savingsRequestPage.inputYears("10");
+
+    String actualTotalIncome = savingsRequestPage.getActualTotalIncome();
     Assert.assertFalse(actualTotalIncome.equals(""));
     Assert.assertTrue(actualTotalIncome.contains("kr"));
   }
 
-  private void inputYears(String years) {
-    driver.findElement(By.id("yearsInput")).sendKeys(years);
-    driver.findElement(By.id("yearsInput")).sendKeys(Keys.TAB);
-  }
-  private void selectFund(String fundName) {
-    new Select(driver.findElement(By.id("fundSelect"))).selectByVisibleText(fundName);
-  }
-
-  private void inputInvestment(String oneTimeInvestment) {
-    driver.findElement(By.id("oneTimeInvestmentInput")).sendKeys(oneTimeInvestment);
-    driver.findElement(By.id("oneTimeInvestmentInput")).sendKeys(Keys.TAB);
-  }
-
   @Test
   public void itShouldCalculateNetIncome() {
-    //select fund
-    selectFund("Batman's Cave Development");
-    //input investment
-    inputInvestment("25000");
-    //input years
-    inputYears("25");
+    SavingsRequestPage savingsRequestPage = new SavingsRequestPage(driver);
+    savingsRequestPage.selectFund("Batman's Cave Development");
+    savingsRequestPage.inputInvestment("25000");
+    savingsRequestPage.inputYears("25");
 
-    String actualInterestIncome =
-        driver.findElement(By.xpath("//div[contains(@class,'result')]/div[2]/p")).getText();
+    String actualInterestIncome = savingsRequestPage.getInterestIncome();
     Assert.assertFalse(actualInterestIncome.equals(""));
     Assert.assertTrue(actualInterestIncome.contains("kr"));
   }
