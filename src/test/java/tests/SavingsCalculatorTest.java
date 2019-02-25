@@ -8,6 +8,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
+import models.SavingRequest;
 import pages.SavingsRequestPage;
 
 public class SavingsCalculatorTest {
@@ -51,6 +52,54 @@ public class SavingsCalculatorTest {
     String actualInterestIncome = savingsRequestPage.getInterestIncome();
     Assert.assertFalse(actualInterestIncome.equals(""));
     Assert.assertTrue(actualInterestIncome.contains("kr"));
+  }
+
+  @Test
+  public void itShouldEnableAddSavingButton() {
+    SavingsRequestPage savingsRequestPage = new SavingsRequestPage(driver);
+    savingsRequestPage.selectFund("Batman's Cave Development");
+    savingsRequestPage.inputInvestment("25000");
+    savingsRequestPage.inputYears("25");
+    savingsRequestPage.inputEmail("martin.skarbala@itera.no");
+
+    Assert.assertTrue(savingsRequestPage.getApplyForSavingButton().isEnabled());
+  }
+
+  @Test
+  public void itShouldAddNewSavingRequestToTheRecentRequestList() {
+    SavingRequest request = new SavingRequest(
+        "Batman's Cave Development",
+        "25000",
+        25,
+        "martin.skarbala@itera.no"
+    );
+    //arrange
+    SavingsRequestPage savingsRequestPage = new SavingsRequestPage(driver);
+    int initialNumberOfRequests = savingsRequestPage.getRecentRequestsList().size();
+    savingsRequestPage.enterNewSavingRequestData(request);
+    //act
+    savingsRequestPage.getApplyForSavingButton().click();
+    //assert
+    int currentNumberOfRequests = savingsRequestPage.getRecentRequestsList().size();
+    Assert.assertEquals(initialNumberOfRequests + 1, currentNumberOfRequests);
+  }
+
+  @Test
+  public void itShouldStoreCorrectResultDataInNewSavingRequest() {
+    SavingRequest request = new SavingRequest(
+        "Batman's Cave Development",
+        "25000",
+        25,
+        "martin.skarbala@itera.no"
+    );
+    SavingsRequestPage savingsRequestPage = new SavingsRequestPage(driver);
+    savingsRequestPage.enterNewSavingRequestData(request);
+    request.getSavingResult().setTotalIncome(savingsRequestPage.getActualTotalIncome());
+    request.getSavingResult().setRisk(savingsRequestPage.getRiskLevel());
+
+    savingsRequestPage.getApplyForSavingButton().click();
+
+    savingsRequestPage.checkMostRecentSavingRequest(request);
   }
 
   @After
