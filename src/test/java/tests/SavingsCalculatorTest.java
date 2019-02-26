@@ -1,24 +1,21 @@
 package tests;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 
+import context.TestBase;
 import models.SavingRequest;
 import pages.SavingsRequestPage;
 
-public class SavingsCalculatorTest {
-  private WebDriver driver;
+public class SavingsCalculatorTest extends TestBase {
+  private SavingsRequestPage savingsRequestPage;
 
   @Before
-  public void setUp() {
-    System.setProperty("webdriver.chrome.driver", "chromedriver.exe");
-    driver = new ChromeDriver();
-    driver.get("http://localhost:8888/savingscalculator.php");
+  public void openPage() {
+    savingsRequestPage = new SavingsRequestPage(driver);
+    savingsRequestPage.openPage();
   }
 
   @Test
@@ -26,25 +23,25 @@ public class SavingsCalculatorTest {
     String expectedTitle = "Savings Calculator";
     String actualTitle = driver.findElement(By.cssSelector("h1")).getText();
 
-    Assert.assertEquals(expectedTitle, actualTitle);
+    Assert.assertEquals("wefkwefoiwefhwef", expectedTitle, actualTitle);
   }
 
   @Test
   public void itShouldCalculateTotalIncome() {
-    SavingsRequestPage savingsRequestPage = new SavingsRequestPage(driver);
-
     savingsRequestPage.selectFund("Hoggwart's Fund");
     savingsRequestPage.inputInvestment("52000");
     savingsRequestPage.inputYears("10");
 
     String actualTotalIncome = savingsRequestPage.getActualTotalIncome();
     Assert.assertFalse(actualTotalIncome.equals(""));
-    Assert.assertTrue(actualTotalIncome.contains("kr"));
+    Assert.assertTrue(
+        "Total income should contain currency",
+        actualTotalIncome.contains("kr")
+    );
   }
 
   @Test
   public void itShouldCalculateNetIncome() {
-    SavingsRequestPage savingsRequestPage = new SavingsRequestPage(driver);
     savingsRequestPage.selectFund("Batman's Cave Development");
     savingsRequestPage.inputInvestment("25000");
     savingsRequestPage.inputYears("25");
@@ -56,7 +53,6 @@ public class SavingsCalculatorTest {
 
   @Test
   public void itShouldEnableAddSavingButton() {
-    SavingsRequestPage savingsRequestPage = new SavingsRequestPage(driver);
     savingsRequestPage.selectFund("Batman's Cave Development");
     savingsRequestPage.inputInvestment("25000");
     savingsRequestPage.inputYears("25");
@@ -74,7 +70,6 @@ public class SavingsCalculatorTest {
         "martin.skarbala@itera.no"
     );
     //arrange
-    SavingsRequestPage savingsRequestPage = new SavingsRequestPage(driver);
     int initialNumberOfRequests = savingsRequestPage.getRecentRequestsList().size();
     savingsRequestPage.enterNewSavingRequestData(request);
     //act
@@ -92,7 +87,6 @@ public class SavingsCalculatorTest {
         25,
         "martin.skarbala@itera.no"
     );
-    SavingsRequestPage savingsRequestPage = new SavingsRequestPage(driver);
     savingsRequestPage.enterNewSavingRequestData(request);
     request.getSavingResult().setTotalIncome(savingsRequestPage.getActualTotalIncome());
     request.getSavingResult().setRisk(savingsRequestPage.getRiskLevel());
@@ -100,11 +94,5 @@ public class SavingsCalculatorTest {
     savingsRequestPage.getApplyForSavingButton().click();
 
     savingsRequestPage.checkMostRecentSavingRequest(request);
-  }
-
-  @After
-  public void tearDown() {
-    driver.close();
-    driver.quit();
   }
 }
